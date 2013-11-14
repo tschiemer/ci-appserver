@@ -1,5 +1,23 @@
 <?php
 
+/**
+ * Crontab Manager (intended for CodeIgniter)
+ * 
+ * Interface for CLI crontab. Differentiates between cronjobs managed
+ * by itself and external cronjobs such as not to interfere.
+ * 
+ * Many thanks to Jonathon Hill for the inspiration (https://github.com/compwright/codeigniter-cli-bootstrap)
+ * 
+ * @todo Send output to somebody?
+ * @todo Log anything?
+ * @todo 
+ * 
+ * @version 2013/10/29
+ * @license LGPL v3 http://www.gnu.org/licenses/lgpl-3.0.txt 
+ * @copyright 2013 Philip Tschiemer, <tschiemer@filou.se>
+ * @link https://github.com/tschiemer/ci-crontab
+ */
+
 class Crontab_Manager {
     
     /**
@@ -25,7 +43,7 @@ class Crontab_Manager {
      * @var array
      */
     var $_ids = array(
-        'regex'     => '0-9a-zA-z_-',
+        'regex'     => "0-9a-zA-Z_-",
         'length'    => 8,
         'alphabet'  => '0123456789abcdefghijklmnopqrstruvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_'
     );
@@ -131,11 +149,11 @@ class Crontab_Manager {
     public function add_job($cmd, $when, $options = array())
     {   
         // Sanitize or generate job id
-        $regex = "/^([ˆ{$this->_ids['regex']}+)$/";
+        $regex = "/^([ˆ{$this->_ids['regex']}]+)$/";
         
-        if (! empty($options['job_id']) and preg_match($regex,$options['job_id']))
+        if (! empty($options['job-id']) and preg_match($regex,$options['job-id']))
         {
-            $job_id = $options['job_id'];
+            $job_id = $options['job-id'];
         }
         else
         {
@@ -148,6 +166,9 @@ class Crontab_Manager {
                 $job_id .=  substr($abc, rand(0,$abc_len-1), 1);
             }
         }
+//        print_r($options);
+//        print_r($job_id);
+//        exit;
         
         // Bring when into internally used form
         if (is_string($when) and strpos($when,' '))
@@ -192,6 +213,11 @@ class Crontab_Manager {
     public function last_job_id()
     {
         return $this->_last_job_id;
+    }
+    
+    public function get_jobs()
+    {
+        return $this->_jobs['my'];
     }
     
     /**
@@ -259,7 +285,7 @@ class Crontab_Manager {
         
         $all_jobs = array_merge($my_jobs, $this->_jobs['other']);
 
-        echo implode("\n",$all_jobs);
+        //echo implode("\n",$all_jobs);
         return $this->write_file($all_jobs,$this->_file_signature);
     }
     
@@ -273,7 +299,7 @@ class Crontab_Manager {
         if ($result_code)
         {
             $file = array();
-            $signature = NULL;
+            $signature = '';
             return TRUE;
         }
         
@@ -483,7 +509,7 @@ if (strtolower(php_sapi_name()) == 'cli' and  ! defined('CRONTAB_AS_LIB') and ! 
     
     ob_start();
     require $options['ci-index'];
-    $output = ob_get_contents();
+    $output = ob_get_clean();
     
     echo $output;
     
@@ -494,6 +520,8 @@ if (strtolower(php_sapi_name()) == 'cli' and  ! defined('CRONTAB_AS_LIB') and ! 
     /**
      * @todo log?
      */
-    
-        
 }
+
+
+/** End of file crontab.php **/
+/** Location: ./application/third_party/crontab.php **/
